@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using OGCP.Curriculums.DAL.Model;
 using OGCP.Curriculums.ODATA.Helpers;
+using System;
 
 namespace OGCP.Curriculums.ODATA.Controllers;
 
@@ -21,13 +23,13 @@ public class ProfilesController : ODataController
     //This only works for odata
     //The attribute base routing is the best approach for apis
     [HttpGet("profiles")]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetProfiles()
     {
         return Ok(await context.Profiles.ToListAsync());
     }
 
     [HttpGet("profiles({id})")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetProfile(int id)
     {
         return Ok(await context.Profiles.FirstOrDefaultAsync(p => p.Id == id));
     }
@@ -35,7 +37,7 @@ public class ProfilesController : ODataController
     [HttpGet("profiles({id})/Summary")]
     [HttpGet("profiles({id})/FirstName")]
     [HttpGet("profiles({id})/LastName")]
-    public async Task<IActionResult> GetPersonProperty(int id)
+    public async Task<IActionResult> GetProfileProperty(int id)
     {
         var person = await context.Profiles
             .FirstOrDefaultAsync(p => p.Id == id);
@@ -66,7 +68,7 @@ public class ProfilesController : ODataController
     [HttpGet("profiles({id})/Summary/$value")]
     [HttpGet("profiles({id})/FirstName/$value")]
     [HttpGet("profiles({id})/LastName/$value")]
-    public async Task<IActionResult> GetPersonPropertyRawValue(int id)
+    public async Task<IActionResult> GetProfilePropertyRawValue(int id)
     {
         var person = await context.Profiles
           .FirstOrDefaultAsync(p => p.Id == id);
@@ -98,7 +100,7 @@ public class ProfilesController : ODataController
     [HttpGet("profiles({id})/Languages")]
     [HttpGet("profiles({id})/educations")]
     [HttpGet("profiles({id})/jobExperiences")]
-    public IActionResult GetPersonCollectionProperty(int id)
+    public IActionResult GetProfileCollectionProperty(int id)
     {
         var collectionPopertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
             .Segments.Last();
@@ -118,5 +120,87 @@ public class ProfilesController : ODataController
         }
 
         return Ok(profile.GetValue(collectionPopertyToGet));
+    }
+
+    [HttpPost("profiles")]
+    //TODO: research on how post with odata
+    //DO we need two separates data models ??
+    public async Task<IActionResult> CreateProfile([FromBody] Profile profile)
+    {
+        //if (!ModelState.IsValid)
+        //{
+        //    return BadRequest(ModelState);
+        //}
+
+        context.Profiles.Add(profile);
+        await context.SaveChangesAsync();
+
+        return Created(profile);
+    }
+
+    [HttpPut("profiles({id})")]
+    public async Task<IActionResult> UpdateProfile(int id, [FromBody] Profile profile)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var currentProfile = await context.Profiles
+          .FirstOrDefaultAsync(p => p.Id== id);
+
+        if (currentProfile == null)
+        {
+            return NotFound();
+        }
+
+        profile.Id= currentProfile.Id;
+        //updating in this way we ensure that both persons are the same
+        //Since from body we can receive an id too !!
+        //here if both ids are different weill fail the update
+        context.Entry(currentProfile).CurrentValues.SetValues(profile);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
+    [HttpPatch("profiles({id})")]
+    public async Task<IActionResult> PartiallyUpdatePerson(int id,
+        [FromBody] Delta<Profile> patch)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var currentPerson = await context.Profiles
+                       .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (currentPerson == null)
+        {
+            return NotFound();
+        }
+
+        patch.Patch(currentPerson);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("profiles({id})")]
+    public async Task<IActionResult> DeleteOnePerson(int id)
+    {
+        var currentPerson = await context.Profiles
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (currentPerson == null)
+        {
+            return NotFound();
+        }
+
+        context.Profiles.Remove(currentPerson);
+        await context.SaveChangesAsync();
+        return NoContent();
     }
 }
