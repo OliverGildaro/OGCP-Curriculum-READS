@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using OGCP.Curriculums.DAL.Model;
@@ -10,7 +11,6 @@ using System;
 
 namespace OGCP.Curriculums.ODATA.Controllers;
 
-[Route("odata")]
 public class ProfilesController : ODataController
 {
     private readonly ProfilesContext context;
@@ -30,15 +30,24 @@ public class ProfilesController : ODataController
         return Ok(context.Profiles);
     }
 
-    [HttpGet("profiles({id})")]
-    public async Task<IActionResult> GetProfile(int id)
+    [EnableQuery]
+    public ActionResult<Profile> Get([FromRoute] int key)
     {
-        return Ok(await context.Profiles.FirstOrDefaultAsync(p => p.Id == id));
+        var profiles = context.Profiles.Where(d => d.Id.Equals(key));
+
+        if (!profiles.Any())
+        {
+            return NotFound();
+        }
+
+        return Ok(SingleResult.Create(profiles));
     }
 
-    [HttpGet("profiles({id})/Summary")]
-    [HttpGet("profiles({id})/FirstName")]
-    [HttpGet("profiles({id})/LastName")]
+    [HttpGet("odata/profiles({id})/Summary")]
+    [HttpGet("odata/profiles({id})/FirstName")]
+    [HttpGet("odata/profiles({id})/LastName")]
+    //we are already able to select properties with [EnableQueyr]
+    //I will only use this method if I need to scale with async programming
     public async Task<IActionResult> GetProfileProperty(int id)
     {
         var person = await context.Profiles
@@ -67,9 +76,9 @@ public class ProfilesController : ODataController
         return Ok(propertyValue);
     }
 
-    [HttpGet("profiles({id})/Summary/$value")]
-    [HttpGet("profiles({id})/FirstName/$value")]
-    [HttpGet("profiles({id})/LastName/$value")]
+    [HttpGet("odata/profiles({id})/Summary/$value")]
+    [HttpGet("odata/profiles({id})/FirstName/$value")]
+    [HttpGet("odata/profiles({id})/LastName/$value")]
     public async Task<IActionResult> GetProfilePropertyRawValue(int id)
     {
         var person = await context.Profiles
@@ -99,32 +108,47 @@ public class ProfilesController : ODataController
         return Ok(propertyValue.ToString());
     }
 
-    [HttpGet("profiles({id})/Languages")]
-    [HttpGet("profiles({id})/educations")]
-    [HttpGet("profiles({id})/jobExperiences")]
-    public IActionResult GetProfileCollectionProperty(int id)
+    //[HttpGet("odata/profiles({id})/Languages")]
+    //[HttpGet("odata/profiles({id})/educations")]
+    //[HttpGet("odata/profiles({id})/jobExperiences")]
+    //public IActionResult GetProfileCollectionProperty(int id)
+    //{
+    //    var collectionPopertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
+    //        .Segments.Last();
+
+    //    var profile = context.Profiles
+    //          .Include(collectionPopertyToGet)
+    //          .FirstOrDefault(p => p.Id == id);
+
+    //    if (profile == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    if (!profile.HasProperty(collectionPopertyToGet))
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    return Ok(profile.GetValue(collectionPopertyToGet));
+    //}
+
+    [HttpGet("odata/profiles({key})/languages")]
+    [EnableQuery]
+    public IActionResult GetLanguagesForPerson(int key)
     {
-        var collectionPopertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
-            .Segments.Last();
-
-        var profile = context.Profiles
-              .Include(collectionPopertyToGet)
-              .FirstOrDefault(p => p.Id == id);
-
-        if (profile == null)
+        if (!context.Profiles.Any(p => p.Id == key))
         {
             return NotFound();
         }
 
-        if (!profile.HasProperty(collectionPopertyToGet))
-        {
-            return NotFound();
-        }
-
-        return Ok(profile.GetValue(collectionPopertyToGet));
+        return Ok(context.Profiles
+            .Include("Languages")
+            .Where(v => v.Id == key));
     }
 
-    [HttpPost("profiles")]
+
+    [HttpPost("odata/profiles")]
     //TODO: research on how post with odata
     //DO we need two separates data models ??
     public async Task<IActionResult> CreateProfile([FromBody] Profile profile)
@@ -140,7 +164,7 @@ public class ProfilesController : ODataController
         return Created(profile);
     }
 
-    [HttpPut("profiles({id})")]
+    [HttpPut("odata/profiles({id})")]
     public async Task<IActionResult> UpdateProfile(int id, [FromBody] Profile profile)
     {
         if (!ModelState.IsValid)
@@ -167,7 +191,7 @@ public class ProfilesController : ODataController
     }
 
 
-    [HttpPatch("profiles({id})")]
+    [HttpPatch("odata/profiles({id})")]
     public async Task<IActionResult> PartiallyUpdatePerson(int id,
         [FromBody] Delta<Profile> patch)
     {
@@ -190,7 +214,7 @@ public class ProfilesController : ODataController
         return NoContent();
     }
 
-    [HttpDelete("profiles({id})")]
+    [HttpDelete("odata/profiles({id})")]
     public async Task<IActionResult> DeleteOnePerson(int id)
     {
         var currentPerson = await context.Profiles
