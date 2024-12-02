@@ -1,0 +1,25 @@
+﻿ODATA
+Odata follows REST principles
+Odata is an open protocole that allows the creation and consumption of a REST API in a standar way
+Is an approved standard by oasys
+	Include:
+	What status codes return an when
+	URL naming conventions
+	Httpmethods to use
+	Information on querien, filtering and paging
+Provide an uniform way to describe data and data model
+Improve semantic interoperability between systems
+Provides metadata that is a readable description of the data model
+The code that needs a client to talk with odata API can be generated because it is an standar
+EDM
+Abstract en data model
+Describe data exposed by odata service using the EDM schema
+Stored form of data is irrelevant
+Entity: Instance of entity type
+Entity Type: NAmed structure type with a key
+Complex type: Like an address
+Type definition: Name primitive types in .net => strings, int
+Navigation property: Relationships between entitoes
+ENtity Set:COllection of entities
+REST
+A browser changes its state by the representation of data that gets from a server
