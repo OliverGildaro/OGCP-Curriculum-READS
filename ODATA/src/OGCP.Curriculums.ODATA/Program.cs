@@ -23,10 +23,14 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+//UseRouting adds routing matching to the midleware pipeline
+//Looks at the set endpoint defined and select the best matches to the request 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+//UseEndpoint adds endpoint execution to the midleware pipeline
+//We add mappings to our controller actions
 app.MapControllers();
 
 app.Run();
