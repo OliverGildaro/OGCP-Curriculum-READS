@@ -143,8 +143,8 @@ public class ProfilesController : ODataController
         }
 
         return Ok(context.Profiles
-            .Include("Languages")
-            .Where(v => v.Id == key));
+            .Where(v => v.Id == key)
+            .SelectMany(p => p.Languages));
     }
 
 
