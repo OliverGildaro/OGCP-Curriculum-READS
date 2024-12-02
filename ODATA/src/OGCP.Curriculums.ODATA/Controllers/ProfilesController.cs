@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using OGCP.Curriculums.DAL.Model;
@@ -22,10 +23,11 @@ public class ProfilesController : ODataController
     //Here we are using the odata routing templates "profiles" to follow up the standard
     //This only works for odata
     //The attribute base routing is the best approach for apis
-    [HttpGet("profiles")]
-    public async Task<IActionResult> GetProfiles()
+    //[HttpGet("profiles")]
+    [EnableQuery]
+    public IActionResult GetProfiles()
     {
-        return Ok(await context.Profiles.ToListAsync());
+        return Ok(context.Profiles);
     }
 
     [HttpGet("profiles({id})")]

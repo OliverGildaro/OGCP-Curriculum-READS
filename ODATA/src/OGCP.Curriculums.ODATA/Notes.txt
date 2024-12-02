@@ -26,3 +26,11 @@ A specific representation of the structure of data as entities an relationships
 Accesible via the metadata endpoint
 ***REST***
 A browser changes its state by the representation of data that gets from a server
+
+**** ODATA QUERIES ****
+Parse: Inspect the url are parse query strings
+Validate: Check wHat we asked is allowed
+Apply the query: COnvert the query options into LINQ expressions
+Deferered execution is the key
+The expressions is are aplied to what is returned from the http action method
+That allows to odata query options extend the IQueryable query variable toutght the EnableQuery filter

@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddOData(
     options => options.AddRouteComponents(
         "odata",
-        new ProfileEntityDataModel().GetEntityDataModel()));
+        new ProfileEntityDataModel().GetEntityDataModel()).Select());
 
 builder.Services.AddDbContext<ProfilesContext>(options =>
 {
