@@ -12,15 +12,15 @@ Improve semantic interoperability between systems
 Provides metadata that is a readable description of the data model
 The code that needs a client to talk with odata API can be generated because it is an standar
 ***EDM***
-Abstract en data model
+Abstract of data model
 Describe data exposed by odata service using the EDM schema
 Stored form of data is irrelevant
 Entity: Instance of entity type
 Entity Type: NAmed structure type with a key
 Complex type: Like an address
 Type definition: Name primitive types in .net => strings, int
-Navigation property: Relationships between entitoes
-ENtity Set:COllection of entities
+Navigation property: Relationships between entities
+Entity Set: Collection of entities
 ***CONCEPTUAL MODEL***
 A specific representation of the structure of data as entities an relationships
 Accesible via the metadata endpoint
@@ -32,5 +32,20 @@ Parse: Inspect the url are parse query strings
 Validate: Check wHat we asked is allowed
 Apply the query: COnvert the query options into LINQ expressions
 Deferered execution is the key
-The expressions is are aplied to what is returned from the http action method
+The expressions is aplied to what is returned from the http action method
 That allows to odata query options extend the IQueryable query variable toutght the EnableQuery filter
+Does not support async calls for build sql expressions approach
+May support async calls but the expression query is applied in memory collections
+
+**** OPERATORS PRECEDENCE ****
+Apply on fileter and order
+FROM LOWER TO HIGHER
+COnditional OR
+Conditional AND
+Equality eq, ne
+Relational gt, ge, lt, le
+Additive add, sub
+Multivative div, mod, mul
+Unary -, not, cast()
+Primary /, has
+Grouping ()

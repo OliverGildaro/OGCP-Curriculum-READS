@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers().AddOData(
-    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
+    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(10).AddRouteComponents(
     "odata", new ProfileEntityDataModel().GetEntityDataModel()));
 
 builder.Services.AddDbContext<ProfilesContext>(options =>

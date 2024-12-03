@@ -15,6 +15,7 @@ namespace OGCP.Curriculums.ODATA.EDM
 
             builder.EntitySet<Profile>("Profiles");
             builder.EntitySet<Language>("Languages");
+            builder.EntitySet<Education>("Educations");
 
             //var isHighRatedFunction = builder.EntityType<RecordStore>()
             //    .Function("IsHighRated");

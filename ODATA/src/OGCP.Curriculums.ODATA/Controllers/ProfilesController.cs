@@ -24,7 +24,10 @@ public class ProfilesController : ODataController
     //This only works for odata
     //The attribute base routing is the best approach for apis
     //[HttpGet("profiles")]
-    [EnableQuery]
+    //MaxSkip and maxTop is not server paging, this is just configuration
+    //If the client send a query withouth paging filters will get all items from db
+    //To enable server driven paging we use PageSize
+    [EnableQuery(MaxExpansionDepth =3, MaxSkip =10, MaxTop =10, PageSize =6)]
     public IActionResult GetProfiles()
     {
         return Ok(context.Profiles);
