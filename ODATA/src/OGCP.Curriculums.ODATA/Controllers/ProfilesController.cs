@@ -34,7 +34,7 @@ public class ProfilesController : ODataController
     }
 
     [EnableQuery]
-    public ActionResult<Profile> Get([FromRoute] int key)
+    public ActionResult<Profile> GetProfile([FromRoute] int key)
     {
         var profiles = context.Profiles.Where(d => d.Id.Equals(key));
 
@@ -111,45 +111,6 @@ public class ProfilesController : ODataController
         return Ok(propertyValue.ToString());
     }
 
-    //[HttpGet("odata/profiles({id})/Languages")]
-    //[HttpGet("odata/profiles({id})/educations")]
-    //[HttpGet("odata/profiles({id})/jobExperiences")]
-    //public IActionResult GetProfileCollectionProperty(int id)
-    //{
-    //    var collectionPopertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
-    //        .Segments.Last();
-
-    //    var profile = context.Profiles
-    //          .Include(collectionPopertyToGet)
-    //          .FirstOrDefault(p => p.Id == id);
-
-    //    if (profile == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    if (!profile.HasProperty(collectionPopertyToGet))
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    return Ok(profile.GetValue(collectionPopertyToGet));
-    //}
-
-    [HttpGet("odata/profiles({key})/languages")]
-    [EnableQuery]
-    public IActionResult GetLanguagesForPerson(int key)
-    {
-        if (!context.Profiles.Any(p => p.Id == key))
-        {
-            return NotFound();
-        }
-
-        return Ok(context.Profiles
-            .Where(v => v.Id == key)
-            .SelectMany(p => p.Languages));
-    }
-
 
     [HttpPost("odata/profiles")]
     //TODO: research on how post with odata
@@ -195,7 +156,7 @@ public class ProfilesController : ODataController
 
 
     [HttpPatch("odata/profiles({id})")]
-    public async Task<IActionResult> PartiallyUpdatePerson(int id,
+    public async Task<IActionResult> PartiallyUpdateProfile(int id,
         [FromBody] Delta<Profile> patch)
     {
         if (!ModelState.IsValid)
@@ -218,7 +179,7 @@ public class ProfilesController : ODataController
     }
 
     [HttpDelete("odata/profiles({id})")]
-    public async Task<IActionResult> DeleteOnePerson(int id)
+    public async Task<IActionResult> DeleteOneProfile(int id)
     {
         var currentPerson = await context.Profiles
             .FirstOrDefaultAsync(p => p.Id == id);
@@ -232,4 +193,59 @@ public class ProfilesController : ODataController
         await context.SaveChangesAsync();
         return NoContent();
     }
+
+
+    [HttpGet("odata/profiles({key})/languages")]
+    [EnableQuery]
+    public IActionResult GetLanguagesForProfile(int key)
+    {
+        if (!context.Profiles.Any(p => p.Id == key))
+        {
+            return NotFound();
+        }
+
+        return Ok(context.Profiles
+            .Where(v => v.Id == key)
+            .SelectMany(p => p.Languages));
+    }
+
+    [EnableQuery]
+    [HttpGet("odata/profiles({key})/educations")]
+    public IActionResult GetEducationsForProfile(int key)
+    {
+        if (!context.Profiles.Any(p => p.Id == key))
+        {
+            return NotFound();
+        }
+
+        return Ok(context.Profiles
+            .Where(v => v.Id == key)
+            .SelectMany(p => p.Educations));
+    }
+
+    //[HttpGet("odata/profiles({id})/Languages")]
+    //[HttpGet("odata/profiles({id})/educations")]
+    //[HttpGet("odata/profiles({id})/jobExperiences")]
+    //public IActionResult GetProfileCollectionProperty(int id)
+    //{
+    //    var collectionPopertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
+    //        .Segments.Last();
+
+    //    var profile = context.Profiles
+    //          .Include(collectionPopertyToGet)
+    //          .FirstOrDefault(p => p.Id == id);
+
+    //    if (profile == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    if (!profile.HasProperty(collectionPopertyToGet))
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    return Ok(profile.GetValue(collectionPopertyToGet));
+    //}
+
 }
